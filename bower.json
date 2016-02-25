@@ -1,0 +1,22 @@
+{
+  "name": "eve-agents-gui",
+  "description": "",
+  "main": "app.js",
+  "authors": [
+    "Thomas Frei <mail@thomasfrei.de>"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "js-sequence-diagrams": "bramp/js-sequence-diagrams#~1.0.6",
+    "jquery": "^2.2.1"
+  }
+}
