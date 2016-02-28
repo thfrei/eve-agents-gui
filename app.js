@@ -99,16 +99,26 @@ function Parser() {
     var start = '';
     var end = '';
     if(this.findDirection(msg.from, msg.to) == 'right') {
-      start = 'x';
+      start = 'o';
       end = '>';
     } else {
       start = '<';
-      end = 'x';
+      end = 'o';
     }
     out += this.drawNTimes(' ', beginning * this.size);
     out += start;
     out += this.drawNTimes('-', distance * this.size);
     out += end;
+
+    out += this.drawNTimes(' ', this.renderHeader().length-out.length);
+    if(msg.type == 'rpc') {
+      out += msg.type + msg.method + '(' + JSON.stringify(msg.params)+')';
+    } else if (msg.message) {
+      // Answer on a CArequestParticipant or CAcfpListener
+      out += msg.type + ': ('+JSON.stringify(msg.message)+')';
+    } else {
+      out += msg.type + ': ' + msg.conversation + ': ('+JSON.stringify(msg.objective)+')';
+    }
     return out;
   };
 
