@@ -35,82 +35,132 @@ app.get('/yumli', function (req, res) {
 });
 
 mqtt.subscribe('#');
+
+var guiParser = new Parser();
 mqtt.on('message', function(topic, message){
-  //console.log(topic, JSON.parse(message.toString()));
-  let msg = JSON.parse(message.toString());
+  if (topic == 'sniffer') {
+    let msg = JSON.parse(message.toString());
 
-  //tP.newMessage();
-  //tP.setMain(msg.from);
-  //tP.setFrom(msg.from);
-  //tP.setTo(msg.to);
-  //tP.setContent(msg.type);
-  //
-  //console.log(tP.parse());
+    guiParser.parse(msg);
 
-  //console.log(msg.from.substr(0,9), '\t', msg.to.substr(0,9), '\t', msg.type);
-
-  io.emit('mqttSniffer', msg);
+    io.emit('line', guiParser.renderMessage(msg));
+    io.emit('header', guiParser.renderHeader());
+  }
 });
 
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
+var mock = [
+  { to: 'DFUID',
+  from: 'Order1',
+  type: 'rpc',
+  method: 'search',
+  params: { skill: 'cfp-bottleInput' } },{ to: 'DFUID',
+  from: 'Order1',
+  type: 'rpc',
+  method: 'search',
+  params: { skill: 'cfp-fill' } },{ to: 'DFUID',
+  from: 'Order1',
+  type: 'rpc',
+  method: 'search',
+  params: { skill: 'cfp-bottleOutput' } },{ to: 'BottleInput',
+  from: 'Order1',
+  type: 'CAcfp',
+  conversation: 'cfp-bottleInput',
+  objective: { bottleType: 'longneck', size: 300 } }
+,
+  { to: 'Filler',
+  from: 'Order1',
+  type: 'CArequest',
+  conversation: 'request-execute',
+  objective: { taskId: 'fill-5d094b4d-dac0-479e-bb94-e3542de2b354' } }
+];
+var gui = new Parser();
+mock.forEach(function(msg){
+  gui.parse(msg);
+  console.log(gui.renderMessage(msg));
 });
+console.log(gui.renderHeader());
+console.log(gui.agents);
 
-setInterval( function() {
-  io.emit('newMessage', '  @message "juhuuu", "JUMLY"');
-}, 10*1000);
-
-function topologyParser() {
+function Parser() {
   this.agents = [];
-  this.main = '';
-  this.message = {};
-  this.output = '';
+  this.size = 10; // 10 dashes per agent
 
-  this.setMain = function(main) {
-    if( _.isEmpty(this.main) ) {
-      this.main = main;
-      this.output += '@found "'+main+'"\n';
+  this.parse = function(msg) {
+    // Check if agent is known
+    this.updateAgent(msg.from);
+    this.updateAgent(msg.to);
+  };
+
+  this.renderMessage = function(msg) {
+    var distance  = this.calculateDistance(msg.from, msg.to);
+    var beginning = this.findBeginning(msg.from, msg.to);
+
+    var out = '  ';
+    var start = '';
+    var end = '';
+    if(this.findDirection(msg.from, msg.to) == 'right') {
+      start = 'x';
+      end = '>';
+    } else {
+      start = '<';
+      end = 'x';
     }
+    out += this.drawNTimes(' ', beginning * this.size);
+    out += start;
+    out += this.drawNTimes('-', distance * this.size);
+    out += end;
+    return out;
   };
 
-  this.newMessage = function() {
-    this.message = {};
-    this.output = '';
+  this.renderHeader = function() {
+    var self = this;
+    var out = '';
+    this.agents.forEach(function(agent) {
+      agent = agent.substr(0,9);
+      var diff = 10 - agent.length;
+      if(diff) {
+        agent += self.drawNTimes('.',diff);
+      }
+      out += agent;
+    });
+    return out;
   };
 
-  this.setFrom = function(from) {
-    this.message.from = from;
-  };
-  this.setTo = function(to) {
-    this.message.to = to;
-  };
-  this.setContent = function(content) {
-    this.message.content = content;
+  this.drawNTimes = function(letter, times) {
+    var out = '';
+    for(var i=0; i<times; i++) {
+      out += letter;
+    }
+    return out;
   };
 
-  this.update = function(agent) {
-    if( ! _.find(this.agents, agent) ) {
+  this.updateAgent = function(agent) {
+    if(_.indexOf(this.agents, agent) == -1){
       this.agents.push(agent);
     }
   };
 
-  this.parse = function() {
-    if (this.message.from == this.main) {
-      this.output += '  @message "' + this.message.content + '", "' + this.message.to + '"';
-    }
-    else if (this.message.to == this.main) {
+  this.calculateDistance = function(agent1, agent2) {
+    var a1Pos = _.indexOf(this.agents, agent1);
+    var a2Pos = _.indexOf(this.agents, agent2);
 
-    }
-    else {
-      this.output += '  "' + this.message.content + '", to: "' + this.message.to + '" from: "' + this.message.from + '"';
-    }
+    return Math.abs(a1Pos-a2Pos);
+  };
 
+  this.findBeginning = function(agent1, agent2) {
+    var a1Pos = _.indexOf(this.agents, agent1);
+    var a2Pos = _.indexOf(this.agents, agent2);
 
-    return this.output;
+    return (a1Pos<a2Pos)?a1Pos:a2Pos;
+  };
+
+  this.findDirection = function(agent1, agent2) {
+    var a1Pos = _.indexOf(this.agents, agent1);
+    var a2Pos = _.indexOf(this.agents, agent2);
+
+    return (a2Pos>a1Pos)?'right':'left';
   }
+
 }
-let tP = new topologyParser();
+
 

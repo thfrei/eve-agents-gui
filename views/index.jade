@@ -11,10 +11,17 @@ block title
 block content
     p content
 
-    #sniffer
+    pre#snifferHeader
+    pre#sniffer
 
     script(type='text/javascript').
-        socket.on('mqttSniffer', function (data) {
-            console.log(data);
-            $('#sniffer').append(JSON.stringify(data)+'\n');
+
+        socket.on('line', function (data) {
+            $('#sniffer').append(data + '\n');
         });
+        socket.on('header', function (data) {
+            $('#snifferHeader').text(data + '\n');
+        });
+
+
+        //        Parser.prototype.append
