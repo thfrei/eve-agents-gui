@@ -1,0 +1,20 @@
+extends ./layout.jade
+
+block scripts
+    script.
+        //var socket = io.connect('http://localhost:3000');
+        var socket = io();
+
+block title
+    title Article Title
+
+block content
+    p content
+
+    #sniffer
+
+    script(type='text/javascript').
+        socket.on('mqttSniffer', function (data) {
+            console.log(data);
+            $('#sniffer').append(JSON.stringify(data)+'\n');
+        });
