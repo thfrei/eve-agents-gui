@@ -20,10 +20,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 
 server.listen(3000);
+console.log('server listening');
 
-app.get('/', function (req, res) {
-  res.render('index', {content: 'hi'});
+
+app.get('/ko', function (req, res) {
+  res.render('knockout', {content: 'hi'});
 });
+app.get('/yumli', function (req, res) {
+  res.render('yumli', {content: 'hi'});
+});
+
 
 io.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
@@ -33,5 +39,5 @@ io.on('connection', function (socket) {
 });
 
 setInterval( function() {
-  io.emit('newMessage', 'A->B NEU!');
-},1000);
+  io.emit('newMessage', '  @message "juhuuu", "JUMLY"');
+}, 10*1000);

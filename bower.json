@@ -17,6 +17,9 @@
   ],
   "dependencies": {
     "js-sequence-diagrams": "bramp/js-sequence-diagrams#~1.0.6",
-    "jquery": "^2.2.1"
+    "jquery": "^2.2.1",
+    "knockout": "^3.4.0",
+    "jumly": "https://github.com/tmtk75/jumly.git#^0.2.5",
+    "coffee-script": "^1.10.0"
   }
 }

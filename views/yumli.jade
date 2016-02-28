@@ -1,0 +1,39 @@
+extends ./layout.jade
+
+block scripts
+    script.
+        //var socket = io.connect('http://localhost:3000');
+        var socket = io();
+        socket.on('news', function (data) {
+            console.log(data);
+            socket.emit('my other event', { my: 'data' });
+            });
+
+block title
+    title Article Title
+
+block content
+    p= content
+
+    #yumli(data-jumly='text/jumly+sequence', style='display:none;')
+        | @found "You", ->
+        |   @message "get", "JUMLY"
+        |   @message "get", "JUMLY"
+    #yumliholder
+
+    script(type='text/javascript').
+        console.log($('#yumli').text());
+
+        function yumliAppend(data) {
+            $('#yumli').append('\n' + data);
+            //console.log($('#yumli').text());
+            JUMLY.eval($('#yumli'), {into: '#yumliholder'});
+        }
+        yumliAppend('  @message "hahahahaha", "JUMLY"');
+        yumliAppend('  @message "hah4321aha", "JUMLY"');
+        yumliAppend('  @message "hahahahaha", "JUMLY"');
+
+        socket.on('newMessage', function (data) {
+            console.log(data);
+            yumliAppend(data);
+        });
