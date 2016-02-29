@@ -34,6 +34,10 @@ app.get('/yumli', function (req, res) {
   res.render('yumli', {content: 'hi'});
 });
 
+app.get('/sbadmin2', function (req, res) {
+  res.render('sbadmin2', {title: 'eve-agents-gui'});
+});
+
 mqtt.subscribe('#');
 
 var guiParser = new Parser();

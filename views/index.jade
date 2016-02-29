@@ -1,18 +1,11 @@
-extends ./layout.jade
-
-block scripts
-    script.
-        //var socket = io.connect('http://localhost:3000');
-        var socket = io();
-
-block title
-    title Article Title
+extends ./layout-sbadmin2.jade
 
 block content
     p content
-
-    pre#snifferHeader
-    pre#sniffer
+    .row
+        .col-lg-12
+            pre#snifferHeader
+            pre#sniffer
 
     script(type='text/javascript').
 

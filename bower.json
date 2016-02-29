@@ -20,6 +20,7 @@
     "knockout": "^3.4.0",
     "jumly": "https://github.com/tmtk75/jumly.git#^0.2.5",
     "coffee-script": "^1.10.0",
-    "lodash": "^4.5.1"
+    "lodash": "^4.5.1",
+    "startbootstrap-sb-admin-2": "^1.0.8"
   }
 }
