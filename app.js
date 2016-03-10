@@ -50,6 +50,11 @@ mqtt.on('message', function(topic, message){
     io.emit('line', guiParser.renderMessage(msg));
     io.emit('header', guiParser.renderHeader());
   }
+
+  if (topic == '/df/agent/registered') {
+    guiParser.updateAgent(JSON.parse(message));
+    io.emit('header', guiParser.renderHeader());
+  }
 });
 
 var mock = [

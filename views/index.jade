@@ -8,13 +8,9 @@ block content
             pre#sniffer
 
     script(type='text/javascript').
-
         socket.on('line', function (data) {
             $('#sniffer').append(data + '\n');
         });
         socket.on('header', function (data) {
             $('#snifferHeader').text(data + '\n');
         });
-
-
-        //        Parser.prototype.append
