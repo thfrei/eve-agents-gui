@@ -46,6 +46,7 @@ mqtt.on('message', function(topic, message){
     let msg = JSON.parse(message.toString());
 
     guiParser.parse(msg);
+    console.log(msg);
 
     io.emit('line', guiParser.renderMessage(msg));
     io.emit('header', guiParser.renderHeader());
@@ -76,11 +77,23 @@ var mock = [
   conversation: 'cfp-bottleInput',
   objective: { bottleType: 'longneck', size: 300 } }
 ,
-  { to: 'Filler',
-  from: 'Order1',
-  type: 'CArequest',
-  conversation: 'request-execute',
-  objective: { taskId: 'fill-5d094b4d-dac0-479e-bb94-e3542de2b354' } }
+  {
+    to: 'Filler',
+    from: 'Order1',
+    type: 'CArequest',
+    conversation: 'request-execute',
+    objective: {taskId: 'fill-5d094b4d-dac0-479e-bb94-e3542de2b354'}
+  }
+  , { to: 'Filler',
+    from: 'Order1' }
+  , { to: 'Order1',
+    from: 'Filler' }
+  , { to: 'BottleInput',
+    from: 'DFUID' }
+  , { to: 'BottleInput',
+    from: 'Order1' }
+  , { to: 'Filler',
+    from: 'BottleInput' }
 ];
 var gui = new Parser();
 mock.forEach(function(msg){
@@ -114,19 +127,20 @@ function Parser() {
       start = '<';
       end = 'o';
     }
-    out += this.drawNTimes(' ', beginning * this.size);
+    out += this.drawNTimesFirst(' ', (beginning * this.size));
     out += start;
-    out += this.drawNTimes('-', distance * this.size);
+    out += this.drawNTimesSecond('-', (distance * this.size));
     out += end;
-
     out += this.drawNTimes(' ', this.renderHeader().length-out.length);
+    out = out.slice(0, -1); // cut last element
+
     if(msg.type == 'rpc') {
-      out += msg.type + msg.method + '(' + JSON.stringify(msg.params)+')';
+      out += msg.type + msg.method + '(' + JSON.stringify(msg.params)+')' + msg.time;
     } else if (msg.message) {
       // Answer on a CArequestParticipant or CAcfpListener
-      out += msg.type + ': ('+JSON.stringify(msg.message)+')';
+      out += msg.type + ': ('+JSON.stringify(msg.message)+')' + msg.time;
     } else {
-      out += msg.type + ': ' + msg.conversation + ': ('+JSON.stringify(msg.objective)+')';
+      out += msg.type + ': ' + msg.conversation + ': ('+JSON.stringify(msg.objective)+')' + msg.time;
     }
     return out;
   };
@@ -145,10 +159,52 @@ function Parser() {
     return out;
   };
 
+  this.drawNTimesFirst = function(letter, times) {
+    var out = '';
+
+    for(var i=0; i<times; i++) {
+      // Insert a | every 10 times
+      if( i % 10 === 0 && i !== 0) {
+        out += '|'
+      } else {
+        out += letter;
+      }
+    }
+    return out;
+  };
+
+  this.drawNTimesSecond = function(letter, times) {
+    var out = '';
+
+    for(var i=0; i<times; i++) {
+      // Insert a | every 10 times
+      if( i % 10 === 0 && i !== 0) {
+        out += '|'
+      } else {
+        out += letter;
+      }
+    }
+    //if (out.length === 10) {
+      out = out.slice(1);
+    //}
+    return out;
+  };
+
   this.drawNTimes = function(letter, times) {
     var out = '';
+
     for(var i=0; i<times; i++) {
-      out += letter;
+      // Insert a | every 10 times
+      if( i % 10 === 0 && i !== 0) {
+        out += '|'
+      } else {
+        out += letter;
+      }
+    }
+
+    // Bugfix: whitespace start needs one additional whitespace
+    if( letter === ' ') {
+      out = out.slice(1); //cut first element
     }
     return out;
   };
